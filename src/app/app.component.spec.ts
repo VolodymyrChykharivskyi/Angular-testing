@@ -1,21 +1,40 @@
+import { Spectator, createComponentFactory } from '@ngneat/spectator';
+
 import { AppComponent } from './app.component';
-import { createComponentFactory, Spectator } from '@ngneat/spectator';
+import { MockProvider } from 'ng-mocks';
+import { UserService } from './services/user/user.service';
 
 describe('AppComponent', () => {
     let spectator: Spectator<AppComponent>;
-    const createComponent = createComponentFactory({ component: AppComponent });
-
-    beforeEach(() => {
-        spectator = createComponent();
+    const createComponent = createComponentFactory({
+        component: AppComponent,
     });
 
-    it('should create the app', () => {
-        expect(spectator.component).toBeTruthy();
+    describe('when name is Adam', () => {
+        const title = 'Welcome Adam!';
+
+        beforeEach(() => {
+            spectator = createComponent({
+                providers: [MockProvider(UserService, { getTitle: (_name: string) => title })],
+            });
+        });
+
+        it('should render title', () => {
+            expect(spectator.query('h1')).toHaveExactText(title);
+        });
     });
 
-    it('should render title', () => {
-        const title = spectator.query('.content span')?.textContent;
+    describe('when name is Julia', () => {
+        const title = 'Julia';
 
-        expect(title).toBe('angular-testing app is running!');
+        beforeEach(() => {
+            spectator = createComponent({
+                providers: [MockProvider(UserService, { getTitle: (_name: string) => title })],
+            });
+        });
+
+        it('should render title', () => {
+            expect(spectator.query('h1')).toHaveExactText(title);
+        });
     });
 });
